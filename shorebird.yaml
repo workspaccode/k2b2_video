@@ -1,0 +1,30 @@
+# This file contains configuration for Shorebird.
+# Learn more at https://docs.shorebird.dev/
+
+# Your Shorebird app ID.
+app_id: k2b2_video
+
+# Flavors available for this app.
+flavors:
+  # The name of the flavor as defined in your Flutter project.
+  development:
+    # The Shorebird app ID for this flavor.
+    app_id: k2b2_video_dev
+  
+  production:
+    # The Shorebird app ID for this flavor.
+    app_id: k2b2_video_prod
+
+# Auto-update configuration
+auto_update:
+  # Whether to check for updates automatically
+  enabled: true
+  
+  # How often to check for updates (in seconds)
+  check_interval: 3600
+  
+  # Whether to download updates automatically
+  auto_download: true
+  
+  # Whether to install updates automatically
+  auto_install: false
