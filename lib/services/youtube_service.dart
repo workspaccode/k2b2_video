@@ -35,10 +35,9 @@ class YouTubeService {
       // Fix: Use regular for loop instead of await for since VideoSearchList is not a Stream
       for (final video in videos) {
         if (count >= limit) break;
-        if (video is Video) {
-          videoList.add(_convertToVideoModel(video));
-          count++;
-        }
+        // Removed unnecessary type check since videos are already Video objects
+        videoList.add(_convertToVideoModel(video));
+        count++;
       }
 
       return videoList;
@@ -58,10 +57,9 @@ class YouTubeService {
       // Fix: Use regular for loop instead of await for since VideoSearchList is not a Stream
       for (final video in videos) {
         if (count >= limit) break;
-        if (video is Video) {
-          videoList.add(_convertToVideoModel(video));
-          count++;
-        }
+        // Removed unnecessary type check since videos are already Video objects
+        videoList.add(_convertToVideoModel(video));
+        count++;
       }
 
       return videoList;
