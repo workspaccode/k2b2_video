@@ -66,7 +66,7 @@ void main() async {
       print('   Quality: ${videoModel.quality}');
     }
 
-    print('\n' + '=' * 50);
+    print('\n${'=' * 50}');
     print('🎉 All tests completed successfully!');
     print('🌟 Jikan API integration is working with satisfying results!');
     print('\n📊 Summary:');

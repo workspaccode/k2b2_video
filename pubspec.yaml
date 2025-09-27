@@ -21,7 +21,6 @@ dependencies:
   firebase_analytics: ^10.7.4
   # Authentication
   google_sign_in: ^6.1.6
-  flutter_facebook_auth: ^6.0.4
   # State management
   equatable: ^2.0.5
   # Video streaming dependencies
@@ -29,13 +28,28 @@ dependencies:
   video_player: ^2.8.1
   shimmer: ^3.0.0
   cached_network_image: ^3.3.0
+  # Advanced video packages
+  chewie: ^1.13.0  # Advanced video player with controls
+  video_thumbnail: ^0.5.3  # Video thumbnail generation
+  video_compress: ^3.1.2  # Video compression for smaller downloads
   # API and networking
   dio: ^5.3.2
   retrofit: ^4.0.3
   json_annotation: ^4.8.1
+  youtube_explode_dart: ^2.5.2  # YouTube API integration
+  youtube_shorts: ^4.0.2  # YouTube Shorts integration
+  # MediaKit dependencies for youtube_shorts
+  media_kit: ^1.1.11  # Primary package
+  media_kit_video: ^1.2.5  # For video rendering
+  media_kit_libs_video: ^1.0.5  # Native video dependencies
   # Download functionality
   path_provider: ^2.1.1
   permission_handler: ^11.0.1
+  flutter_downloader: ^1.11.8  # For background downloads
+  # Storage and caching
+  hive: ^2.2.3  # Fast local database
+  hive_flutter: ^1.1.0
+  sqflite: ^2.3.0  # SQL database for complex queries
   # Connectivity and network
   connectivity_plus: ^5.0.2
   internet_connection_checker: ^1.0.0+1
@@ -46,8 +60,14 @@ dependencies:
   flutter_animate: ^4.5.0
   smooth_page_indicator: ^1.1.0
   iconly: ^1.0.1
+  # Social features
+  share_plus: ^7.2.1  # Share content
+  url_launcher: ^6.2.2  # Open URLs
+  # File and media handling
+  image_picker: ^1.0.4  # Pick images/videos
+  file_picker: ^8.0.0+1  # File selection with v2 embedding support
   # Notifications
-  # flutter_local_notifications: ^16.3.2 # Temporarily disabled
+  flutter_local_notifications: ^17.2.2  # Local notifications for downloads
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +77,8 @@ dev_dependencies:
   build_runner: ^2.4.7
   retrofit_generator: ^8.0.4
   json_serializable: ^6.7.1
+  # Database code generation
+  hive_generator: ^2.0.1
 
 flutter:
   uses-material-design: true

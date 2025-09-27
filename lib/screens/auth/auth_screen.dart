@@ -5,6 +5,8 @@ import 'package:glassmorphism/glassmorphism.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:iconly/iconly.dart';
 
+import 'forgot_password_screen.dart';
+
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -305,8 +307,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 ),
                 validator: (value) {
                   if (value?.isEmpty ?? true) return 'Password is required';
-                  if (value!.length < 6)
+                  if (value!.length < 6) {
                     return 'Password must be 6+ characters';
+                  }
                   return null;
                 },
               ),
@@ -317,7 +320,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // Handle forgot password
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
                     },
                     child: Text(
                       'Forgot Password?',
@@ -559,7 +566,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       onTap: onTap,
       child: GlassmorphicContainer(
         width: double.infinity,
-        height: 52,
+        height: 32,
         borderRadius: 12,
         blur: 10,
         alignment: Alignment.center,

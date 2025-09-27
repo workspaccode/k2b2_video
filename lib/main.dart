@@ -1,10 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:k2b2_video/firebase_options.dart';
+import 'package:media_kit/media_kit.dart';
 
 import 'core/di.dart';
 import 'features/auth/cubit/auth_cubit.dart';
+import 'models/download_models.dart';
+import 'screens/downloads_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/profile_screen.dart';
@@ -16,10 +20,20 @@ import 'services/shorebird_update_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize MediaKit for youtube_shorts
+  MediaKit.ensureInitialized();
+
+  // Initialize Hive
+  await Hive.initFlutter();
+  Hive.registerAdapter(DownloadTaskAdapter());
+  Hive.registerAdapter(DownloadSettingsAdapter());
+  Hive.registerAdapter(DownloadStatusAdapter());
+  Hive.registerAdapter(DownloadQualityAdapter());
+
   // Initialize Firebase
   try {
     await Firebase.initializeApp(
-       options: DefaultFirebaseOptions.currentPlatform,
+      options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
     print('Firebase initialization error: $e');
@@ -63,6 +77,7 @@ class _MainNavigationState extends State<MainNavigation> {
     LoginScreen(),
     HomeScreen(),
     VideoScreen(),
+    DownloadsScreen(),
     SubscriptionScreen(),
     ProfileScreen(),
   ];
@@ -86,6 +101,10 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.ondemand_video),
             label: 'Video',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.download),
+            label: 'Downloads',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Subscribe'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),

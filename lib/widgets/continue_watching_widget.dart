@@ -205,6 +205,19 @@ class _ContinueWatchingWidgetState extends State<ContinueWatchingWidget>
                                 child: CachedNetworkImage(
                                   imageUrl: video.thumbnailUrl,
                                   fit: BoxFit.cover,
+                                  placeholder: (context, url) =>
+                                      Shimmer.fromColors(
+                                        baseColor: const Color(0xFF1A1A2E),
+                                        highlightColor: const Color(0xFF16213E),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                   errorWidget: (context, url, error) =>
                                       Container(
                                         decoration: BoxDecoration(
@@ -222,10 +235,27 @@ class _ContinueWatchingWidgetState extends State<ContinueWatchingWidget>
                                             12,
                                           ),
                                         ),
-                                        child: const Icon(
-                                          IconlyBold.play,
-                                          color: Colors.white,
-                                          size: 24,
+                                        child: const Center(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                IconlyBold.download,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                'Downloaded',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                 ),

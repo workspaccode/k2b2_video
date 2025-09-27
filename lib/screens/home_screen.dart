@@ -9,12 +9,16 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../models/category_model.dart';
 import '../models/video_model.dart';
+import '../screens/video_player_screen.dart';
 import '../services/connectivity_service.dart';
 import '../services/mock_data_service.dart';
 import '../widgets/connectivity_dialog.dart';
 import '../widgets/continue_watching_widget.dart';
 import 'auth/auth_screen.dart';
 import 'browse/browse_categories_screen.dart';
+import 'reels_screen.dart';
+import 'series_episodes_screen.dart';
+import 'video_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,9 +95,142 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _handleVideoPlay(VideoModel video) {
-    // Check if user is logged in (for now, we'll assume they're not)
-    // In a real app, you'd check authentication state here
-    _showLoginDialog(video);
+    // Check if it's a series (has multiple episodes)
+    if (video.category == 'drama' ||
+        video.title.toLowerCase().contains('season')) {
+      // Navigate to series episodes screen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => SeriesEpisodesScreen(series: video),
+        ),
+      );
+      return;
+    }
+
+    // Navigate to video player screen
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VideoPlayerScreen(video: video),
+      ),
+    );
+  }
+
+  void _handleOfflineVideoPlay(VideoModel video) {
+    // Check if video is downloaded/cached locally
+    bool isDownloaded = _isVideoDownloaded(video);
+
+    if (isDownloaded) {
+      // Play locally saved video
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => const VideoScreen()));
+    } else {
+      // Show offline dialog for unavailable content
+      _showOfflineContentDialog(video);
+    }
+  }
+
+  bool _isVideoDownloaded(VideoModel video) {
+    // Check if video is in the last watched list (simulating downloaded content)
+    // In a real app, you'd check actual file system or database
+    return lastWatchedVideos.any((v) => v.id == video.id) ||
+        video.isDownloadable == true; // For demo purposes
+  }
+
+  void _showOfflineContentDialog(VideoModel video) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF1A1A2E).withValues(alpha: 0.95),
+                  const Color(0xFF16213E).withValues(alpha: 0.95),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF6B6B), Color(0xFFFFA726)],
+                    ),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: const Icon(
+                    IconlyBold.download,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Content Not Available Offline',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '"${video.title}" is not downloaded. Connect to internet to watch or download for offline viewing.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDialogButton(
+                        label: 'OK',
+                        onTap: () => Navigator.of(context).pop(),
+                        isPrimary: false,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildDialogButton(
+                        label: 'Retry Connection',
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          _loadData();
+                        },
+                        isPrimary: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showLoginDialog(VideoModel video) {
@@ -529,13 +666,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               width: double.infinity,
               height: double.infinity,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-                  ),
-                ),
-              ),
+              placeholder: (context, url) => _buildImagePlaceholder(),
+              errorWidget: (context, url, error) =>
+                  _buildImageErrorWidget(video),
             ),
             Container(
               decoration: BoxDecoration(
@@ -668,13 +801,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(width: 16),
           Expanded(
             child: _buildQuickActionCard(
-              icon: IconlyBold.download,
-              title: 'Downloads',
-              subtitle: 'Offline content',
+              icon: IconlyBold.video,
+              title: 'Reels',
+              subtitle: 'Short videos',
               gradient: const LinearGradient(
                 colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
               ),
-              onTap: () => _showSnackBar('Opening downloads'),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const ReelsScreen()),
+                );
+              },
             ),
           ),
         ],
@@ -783,6 +920,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 width: double.infinity,
                 height: double.infinity,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => _buildImagePlaceholder(),
+                errorWidget: (context, url, error) =>
+                    _buildImageErrorWidget(video),
               ),
               Container(
                 decoration: BoxDecoration(
@@ -894,6 +1034,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
+                        placeholder: (context, url) => _buildImagePlaceholder(),
+                        errorWidget: (context, url, error) =>
+                            _buildImageErrorWidget(video),
                       ),
                       Positioned(
                         top: 8,
@@ -1000,18 +1143,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-                            ),
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFFFF6B6B),
-                            ),
-                          ),
-                        ),
+                        placeholder: (context, url) => _buildImagePlaceholder(),
+                        errorWidget: (context, url, error) =>
+                            _buildImageErrorWidget(anime),
                       ),
                       Container(
                         decoration: BoxDecoration(
@@ -1147,6 +1281,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           width: 120,
                           height: 160,
                           fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              _buildImagePlaceholder(),
+                          errorWidget: (context, url, error) =>
+                              _buildImageErrorWidget(anime),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -1322,7 +1460,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return GestureDetector(
       onTap: () => _navigateToBrowseCategories(),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        //padding: const EdgeInsets.all(20),
+        height: 200,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -1338,42 +1477,61 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Spacer(),
+                  Text(
+                    category.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      height: 1.1,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${category.videoCount} videos',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 11,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // HOT badge positioned at top right
             if (category.isPopular)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'HOT',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'HOT',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
-            const Spacer(),
-            Text(
-              category.name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${category.videoCount} videos',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 12,
-              ),
-            ),
           ],
         ),
       ),
@@ -1544,6 +1702,69 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       onPressed: () => _showSnackBar('Search opened'),
       backgroundColor: const Color(0xFFFF6B6B),
       child: const Icon(IconlyBold.search, color: Colors.white),
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF1A1A2E),
+      highlightColor: const Color(0xFF16213E),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          gradient: LinearGradient(
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
+          ),
+        ),
+        child: const Center(
+          child: Icon(IconlyBold.image, color: Color(0xFF4A4A6A), size: 32),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageErrorWidget(VideoModel video) {
+    // Check if we're offline and video is cached
+    bool isOfflineAndCached =
+        _connectionStatus == ConnectivityStatus.offline &&
+        _isVideoDownloaded(video);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isOfflineAndCached
+              ? [
+                  const Color(0xFF27AE60),
+                  const Color(0xFF2ECC71),
+                ] // Green for cached
+              : [const Color(0xFF1A1A2E), const Color(0xFF16213E)], // Default
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isOfflineAndCached ? IconlyBold.download : IconlyBold.image,
+              color: isOfflineAndCached
+                  ? Colors.white
+                  : const Color(0xFF4A4A6A),
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              isOfflineAndCached ? 'Downloaded' : 'Image Unavailable',
+              style: TextStyle(
+                color: isOfflineAndCached
+                    ? Colors.white
+                    : const Color(0xFF4A4A6A),
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
